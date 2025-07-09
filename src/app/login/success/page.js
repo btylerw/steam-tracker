@@ -1,28 +1,35 @@
-// src/app/login/success/page.js
-'use client';
+'use client'
 
-import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useSearchParams } from "next/navigation"
+import { useEffect, useState } from "react"
+import axios from "axios"
 
 export default function LoginSuccess() {
-  const searchParams = useSearchParams();
-  const steamid = searchParams.get('steamid');
-  const [loading, setLoading] = useState(true);
+    const searchParams = useSearchParams();
+    const steamid = searchParams.get('steamid');
+    const [profile, setProfile] = useState(null);
 
-  useEffect(() => {
-    if (steamid) {
-      console.log('SteamID:', steamid);
-      // Optionally store in localStorage, context, etc.
-      setLoading(false);
-    }
-  }, [steamid]);
+    useEffect(() => {
+        if (!steamid) return;
 
-  if (loading) return <p>Verifying Steam login...</p>;
+        const fetchProfile = async () => {
+            try { 
+                const res = await axios.get(`/api/steam/profile?steamid=${steamid}`);
+                setProfile(res.data);
+            } catch (err) {
+                console.error(`Error fetching profile: ${err}`);
+            }
+        };
 
-  return (
-    <div>
-      <h1>Steam login successful!</h1>
-      <p>Your Steam ID: {steamid}</p>
-    </div>
-  );
+        fetchProfile();
+    }, [steamid]);
+
+    if (!profile) return <p>Loading Steam Profile...</p>;
+
+    return (
+        <div>
+            <h1>{profile.personaname}</h1>
+            <img src={profile.avatarfull} alt="avatar" />
+        </div>
+    )
 }
