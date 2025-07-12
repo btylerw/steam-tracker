@@ -48,11 +48,11 @@ export default function LoginSuccess() {
             <h1>{profile.personaname}</h1>
             <img src={profile.avatarfull} alt="avatar" />
             <div className="text-2xl">Played Games:</div>
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-4 gap-4 place-items-center">
                 {renderGames(ownedGames)}
             </div>
             <div className="text-2xl">Unplayed Games:</div>
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-4 gap-4 place-items-center">
                 {renderGames(unplayedGames)}
             </div>
         </div>
