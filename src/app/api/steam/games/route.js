@@ -13,8 +13,6 @@ export async function GET(req) {
     }
 
     try {
-        console.log(steamid);
-        console.log(API_Key);
         const response = await axios.get(
             'https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/',
             {
