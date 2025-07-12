@@ -1,6 +1,5 @@
 "use client"
 import Image from "next/image";
-import * as client from 'openid-client'
 import SteamLoginBtn from '../../public/steam_login_btn1.png';
 import axios from "axios";
 
