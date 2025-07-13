@@ -23,7 +23,7 @@ export async function GET(req) {
                 },
             }
         );
-        console.log(response.data.response.games);
+        //console.log(response.data.response.games);
         const player = response.data.response.games;
         return new Response(JSON.stringify(player), {
             headers: { 'Content-Type': 'application/json' },

@@ -2,6 +2,7 @@
 
 import { useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
+import { HowLongToBeatService, HowLongToBeatEntry } from 'howlongtobeat';
 import axios from "axios"
 
 export default function LoginSuccess() {
@@ -9,8 +10,9 @@ export default function LoginSuccess() {
     const steamid = searchParams.get('steamid');
     const [profile, setProfile] = useState(null);
     const [ownedGames, setOwnedGames] = useState([]);
-    const [unplayedGames, setUnplayedGames] = useState([]);
+    const [backlog, setBacklog] = useState([]);
 
+    
     const renderGames = (games) => {
         return games.map(game => (
             <div key={game.appid} className="flex">
@@ -19,10 +21,10 @@ export default function LoginSuccess() {
             </div>
         ))
     }
-
+    
     useEffect(() => {
         if (!steamid) return;
-
+        
         const fetchProfile = async () => {
             try { 
                 const res = await axios.get(`/api/steam/profile?steamid=${steamid}`);
@@ -32,14 +34,29 @@ export default function LoginSuccess() {
                 const sortedGames = playedGames.sort((a, b) => b.playtime_forever - a.playtime_forever);
                 const unplayedGames = result.data.filter(game => game.playtime_forever <= 0);
                 setOwnedGames(sortedGames);
-                setUnplayedGames(unplayedGames);
+                setBacklog(unplayedGames);
+                console.log(unplayedGames[0])
             } catch (err) {
                 console.error(`Error fetching profile: ${err}`);
             }
         };
-
+        
         fetchProfile();
     }, [steamid]);
+    
+    /*useEffect(() => {
+        console.log('test');
+        const searchGames = async () => {
+            try {
+                const gameNames = backlog.map(game => game.name);
+                const response = await axios.post('/api/hltb', { gameNames });
+                console.log(response.data);
+            } catch (err) {
+                console.error(`Failed to fetch HLTB data: ${err}`);
+            }
+        }
+        searchGames();
+    }, [backlog]);*/
 
     if (!profile) return <p>Loading Steam Profile...</p>;
 
@@ -53,7 +70,7 @@ export default function LoginSuccess() {
             </div>
             <div className="text-2xl">Unplayed Games:</div>
             <div className="grid grid-cols-4 gap-4 place-items-center">
-                {renderGames(unplayedGames)}
+                {renderGames(backlog)}
             </div>
         </div>
     )
