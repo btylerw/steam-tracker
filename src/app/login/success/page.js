@@ -12,6 +12,7 @@ export default function LoginSuccess() {
     const [ownedGames, setOwnedGames] = useState([]);
     const [backlog, setBacklog] = useState([]);
     const [backlogTime, setBacklogTime] = useState(null);
+    const [gamesLoaded, setGamesLoaded] = useState(false);
 
     
     const renderGames = (games) => {
@@ -33,6 +34,7 @@ export default function LoginSuccess() {
                 const result = await axios.get(`/api/steam/games?steamid=${steamid}`);
                 const sortedGames = result.data.sort((a, b) => b.playtime_forever - a.playtime_forever);
                 setAllGames(sortedGames);
+                setGamesLoaded(true);
             } catch (err) {
                 console.error(`Error fetching profile: ${err}`);
             }
@@ -70,9 +72,16 @@ export default function LoginSuccess() {
             }
         }
         searchGames();
-    }, [allGames]);
+    }, [gamesLoaded]);
 
-    if (!profile || !backlogTime) return <p>Loading Steam Profile...</p>;
+    if (!profile || !backlogTime) {
+        return (
+            <div className="flex items-center justify-center">
+                <p>Loading Steam Profile...</p>
+            </div>
+        )
+    
+    }
 
     return (
         <div className="flex items-center justify-center flex-col">
