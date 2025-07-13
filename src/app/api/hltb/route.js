@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { HowLongToBeatService, HowLongToBeatEntry } from 'howlongtobeat';
+import { HowLongToBeatService } from '@btylerw/howlongtobeat';
 
 const hltbService = new HowLongToBeatService();
 
@@ -11,12 +11,9 @@ export async function POST(req) {
     }
     
     try {
-        /*
         const results = await Promise.all(
             gameNames.map(name => hltbService.search(name))
-        );*/
-        const results = await hltbService.search('Nioh');
-        console.log(results);
+        );
         return NextResponse.json(results);
     } catch (err) {
         console.error(`Error hitting API: ${err}`);
