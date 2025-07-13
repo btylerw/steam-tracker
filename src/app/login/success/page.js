@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
-import axios, { all } from "axios"
+import axios from "axios"
 
 export default function LoginSuccess() {
     const searchParams = useSearchParams();
@@ -18,7 +18,7 @@ export default function LoginSuccess() {
         return games.map(game => (
             <div key={game.appid} className="flex">
                 <h3>{game.name} <p>Playtime: {(game.playtime_forever / 60).toFixed(1)} hours</p></h3>
-                <img className="h-24 w-24" src={`https://media.steampowered.com/steamcommunity/public/images/apps/${game.appid}/${game.img_icon_url}.jpg`} alt={`${game.name} icon`}/>
+                <img className="h-36 w-auto" src={game.imageUrl} alt={`${game.name} icon`}/>
             </div>
         ))
     }
@@ -31,12 +31,8 @@ export default function LoginSuccess() {
                 const res = await axios.get(`/api/steam/profile?steamid=${steamid}`);
                 setProfile(res.data);
                 const result = await axios.get(`/api/steam/games?steamid=${steamid}`);
-                setAllGames(result.data);
-                const playedGames = result.data.filter(game => game.playtime_forever > 0);
-                const sortedGames = playedGames.sort((a, b) => b.playtime_forever - a.playtime_forever);
-                const unplayedGames = result.data.filter(game => game.playtime_forever <= 0);
-                setOwnedGames(sortedGames);
-                setBacklog(unplayedGames);
+                const sortedGames = result.data.sort((a, b) => b.playtime_forever - a.playtime_forever);
+                setAllGames(sortedGames);
             } catch (err) {
                 console.error(`Error fetching profile: ${err}`);
             }
@@ -52,21 +48,29 @@ export default function LoginSuccess() {
                 const gameNames = allGames.map(game => game.name);
                 const response = await axios.post('/api/hltb', { gameNames });
                 let timeSum = 0;
-                let totalSteamContent = 0;
+                const imageMap = new Map();
                 response.data.map((data, i) => {
+                    imageMap.set(null);
                     if (data[0]) {
+                        imageMap.set(data[0].name.toLowerCase(), data[0].imageUrl);
                         if (allGames[i].playtime_forever / 60 < data[0].gameplayMain) {
                             timeSum += data[0].gameplayMain;
                         }
                     }
                 });
+                setAllGames(prevGames => 
+                    prevGames.map(game => ({
+                        ...game,
+                        imageUrl: imageMap.get(game.name.toLowerCase()) || null
+                    }))
+                );
                 setBacklogTime(timeSum);
             } catch (err) {
                 console.error(`Failed to fetch HLTB data: ${err}`);
             }
         }
         searchGames();
-    }, [backlog]);
+    }, [allGames]);
 
     if (!profile || !backlogTime) return <p>Loading Steam Profile...</p>;
 
@@ -75,13 +79,9 @@ export default function LoginSuccess() {
             <h1>{profile.personaname}</h1>
             <img src={profile.avatarfull} alt="avatar" />
             <h1 className="text-2xl">You have {backlogTime} hours worth of content in unplayed games</h1>
-            <div className="text-2xl">Played Games:</div>
+            <div className="text-2xl">Owned Games:</div>
             <div className="grid grid-cols-4 gap-4 place-items-center">
-                {renderGames(ownedGames)}
-            </div>
-            <div className="text-2xl">Unplayed Games:</div>
-            <div className="grid grid-cols-4 gap-4 place-items-center">
-                {renderGames(backlog)}
+                {renderGames(allGames)}
             </div>
         </div>
     )
