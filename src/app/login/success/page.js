@@ -2,6 +2,7 @@
 
 import { useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
+import ScrollableWindow from "@/app/components/ScrollableWindow"
 import axios from "axios"
 
 export default function LoginSuccess() {
@@ -89,9 +90,11 @@ export default function LoginSuccess() {
             <img src={profile.avatarfull} alt="avatar" />
             <h1 className="text-2xl">You have {backlogTime} hours worth of content in unplayed games</h1>
             <div className="text-2xl">Owned Games:</div>
+            {/*
             <div className="grid grid-cols-4 gap-4 place-items-center">
                 {renderGames(allGames)}
-            </div>
+            </div>*/}
+            <ScrollableWindow games={allGames}/>
         </div>
     )
 }
