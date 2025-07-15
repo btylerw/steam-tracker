@@ -3,7 +3,7 @@
 import { useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import ScrollableWindow from "@/app/components/ScrollableWindow"
-import axios from "axios"
+import axios, { all } from "axios"
 
 export default function LoginSuccess() {
     const searchParams = useSearchParams();
@@ -17,13 +17,16 @@ export default function LoginSuccess() {
 
     
     const renderGames = (games) => {
-        return games.map(game => (
-            <div key={game.appid} className="flex">
-                <h3>{game.name} <p>Playtime: {(game.playtime_forever / 60).toFixed(1)} hours</p></h3>
-                <img className="h-36 w-auto" src={game.imageUrl} alt={`${game.name} icon`}/>
+        return games.map((game) => (
+            <div key={game.appid} className="flex justify-between items-center mb-4">
+                <div>
+                    <h3 className="text-lg font-semibold">{game.name}</h3>
+                    <p>Playtime: {(game.playtime_forever / 60).toFixed(1)} hours</p>
+                </div>
+                <img className="h-36 w-auto" src={game.imageUrl} alt={`${game.name} icon`} />
             </div>
-        ))
-    }
+        ));
+    };
     
     useEffect(() => {
         if (!steamid) return;
@@ -45,17 +48,19 @@ export default function LoginSuccess() {
     }, [steamid]);
     
     useEffect(() => {
-        console.log('test');
         const searchGames = async () => {
             try {
-                const gameNames = allGames.map(game => game.name);
+                const gameNames = allGames.map(game => {
+                    return game.name.toLowerCase().replace(/[^a-z0-9\s]/gi, '').replace(/\s+/g, ' ').trim();
+                })
                 const response = await axios.post('/api/hltb', { gameNames });
                 let timeSum = 0;
                 const imageMap = new Map();
                 response.data.map((data, i) => {
                     imageMap.set(null);
+                    console.log(data[0]);
                     if (data[0]) {
-                        imageMap.set(data[0].name.toLowerCase(), data[0].imageUrl);
+                        imageMap.set(allGames[i].name.toLowerCase(), data[0].imageUrl);
                         if (allGames[i].playtime_forever / 60 < data[0].gameplayMain) {
                             timeSum += data[0].gameplayMain;
                         }
@@ -90,11 +95,7 @@ export default function LoginSuccess() {
             <img src={profile.avatarfull} alt="avatar" />
             <h1 className="text-2xl">You have {backlogTime} hours worth of content in unplayed games</h1>
             <div className="text-2xl">Owned Games:</div>
-            {/*
-            <div className="grid grid-cols-4 gap-4 place-items-center">
-                {renderGames(allGames)}
-            </div>*/}
-            <ScrollableWindow games={allGames}/>
+            <ScrollableWindow games={renderGames(allGames)}/>
         </div>
     )
 }
