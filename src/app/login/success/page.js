@@ -23,7 +23,7 @@ export default function LoginSuccess() {
                     <h3 className="text-lg font-semibold">{game.name}</h3>
                     <p>Playtime: {(game.playtime_forever / 60).toFixed(1)} hours</p>
                 </div>
-                <img className="h-36 w-auto" src={game.imageUrl} alt={`${game.name} icon`} />
+                <img className="h-48 w-auto" src={game.imageUrl} alt={`${game.name} icon`} />
             </div>
         ));
     };
@@ -56,13 +56,15 @@ export default function LoginSuccess() {
                 const response = await axios.post('/api/hltb', { gameNames });
                 let timeSum = 0;
                 const imageMap = new Map();
+                const backlogIndexes = [];
                 response.data.map((data, i) => {
                     imageMap.set(null);
-                    console.log(data[0]);
+                    console.log(data);
                     if (data[0]) {
                         imageMap.set(allGames[i].name.toLowerCase(), data[0].imageUrl);
                         if (allGames[i].playtime_forever / 60 < data[0].gameplayMain) {
                             timeSum += data[0].gameplayMain;
+                            backlogIndexes.push(i);
                         }
                     }
                 });
@@ -72,6 +74,12 @@ export default function LoginSuccess() {
                         imageUrl: imageMap.get(game.name.toLowerCase()) || null
                     }))
                 );
+
+                const tempBacklog = backlogIndexes.map(index => allGames[index]);
+                setBacklog(tempBacklog.map(game => ({
+                        ...game,
+                        imageUrl: imageMap.get(game.name.toLowerCase()) || null
+                })));
                 setBacklogTime(timeSum);
             } catch (err) {
                 console.error(`Failed to fetch HLTB data: ${err}`);
@@ -90,12 +98,20 @@ export default function LoginSuccess() {
     }
 
     return (
-        <div className="flex items-center justify-center flex-col">
+        <div className="flex items-center justify-center flex-col gap-5">
             <h1>{profile.personaname}</h1>
             <img src={profile.avatarfull} alt="avatar" />
             <h1 className="text-2xl">You have {backlogTime} hours worth of content in unplayed games</h1>
-            <div className="text-2xl">Owned Games:</div>
-            <ScrollableWindow games={renderGames(allGames)}/>
+            <div className="flex items-center justify-center gap-20">
+                <div className="flex items-center justify-center flex-col gap-10">
+                    <div className="text-2xl">Owned Games:</div>
+                    <ScrollableWindow games={renderGames(allGames)}/>
+                </div>
+                <div className="flex items-center justify-center flex-col gap-10">
+                    <div className="text-2xl">Backlog:</div>
+                    <ScrollableWindow games={renderGames(backlog)}/>
+                </div>
+            </div>
         </div>
     )
 }
