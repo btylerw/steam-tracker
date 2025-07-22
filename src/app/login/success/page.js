@@ -1,16 +1,16 @@
 'use client'
 
 import { useSearchParams } from "next/navigation"
-import { useEffect, useState } from "react"
+import Image from "next/image"
+import { useEffect, useState, Suspense } from "react"
 import ScrollableWindow from "@/app/components/ScrollableWindow"
-import axios, { all } from "axios"
+import axios from "axios"
 
-export default function LoginSuccess() {
+function LoginSuccessInner() {
     const searchParams = useSearchParams();
     const steamid = searchParams.get('steamid');
     const [profile, setProfile] = useState(null);
     const [allGames, setAllGames] = useState([]);
-    const [ownedGames, setOwnedGames] = useState([]);
     const [backlog, setBacklog] = useState([]);
     const [backlogTime, setBacklogTime] = useState(null);
     const [gamesLoaded, setGamesLoaded] = useState(false);
@@ -23,7 +23,13 @@ export default function LoginSuccess() {
                     <h3 className="text-lg font-semibold">{game.name}</h3>
                     <p>Playtime: {(game.playtime_forever / 60).toFixed(1)} hours</p>
                 </div>
-                <img className="h-48 w-auto" src={game.imageUrl} alt={`${game.name} icon`} />
+                <Image 
+                    src={game.imageUrl}
+                    height={48}
+                    width={0}
+                    style={{width: 'auto', height: '48px'}}
+                    alt={`${game.name} icon`}
+                />
             </div>
         ));
     };
@@ -100,7 +106,11 @@ export default function LoginSuccess() {
     return (
         <div className="flex items-center justify-center flex-col gap-5">
             <h1>{profile.personaname}</h1>
-            <img src={profile.avatarfull} alt="avatar" />
+            <Image 
+                src={profile.avatarfull} 
+                alt="avatar"
+                fill 
+            />
             <h1 className="text-2xl">You have {backlogTime} hours worth of content in unplayed games</h1>
             <div className="flex items-center justify-center gap-20">
                 <div className="flex items-center justify-center flex-col gap-10">
@@ -113,5 +123,13 @@ export default function LoginSuccess() {
                 </div>
             </div>
         </div>
+    )
+}
+
+export default function LoginSuccess() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <LoginSuccessInner />
+        </Suspense>
     )
 }
