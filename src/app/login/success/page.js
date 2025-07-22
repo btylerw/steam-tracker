@@ -23,13 +23,7 @@ function LoginSuccessInner() {
                     <h3 className="text-lg font-semibold">{game.name}</h3>
                     <p>Playtime: {(game.playtime_forever / 60).toFixed(1)} hours</p>
                 </div>
-                <Image 
-                    src={game.imageUrl}
-                    height={48}
-                    width={0}
-                    style={{width: 'auto', height: '48px'}}
-                    alt={`${game.name} icon`}
-                />
+                <img className="h-48 w-auto" src={game.imageUrl} alt={`${game.name} icon`} />
             </div>
         ));
     };
@@ -109,7 +103,8 @@ function LoginSuccessInner() {
             <Image 
                 src={profile.avatarfull} 
                 alt="avatar"
-                fill 
+                width={256}
+                height={256}
             />
             <h1 className="text-2xl">You have {backlogTime} hours worth of content in unplayed games</h1>
             <div className="flex items-center justify-center gap-20">

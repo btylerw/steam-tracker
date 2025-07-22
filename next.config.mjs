@@ -1,7 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     images: {
-        domains: ['howlongtobeat.com'],
+        domains: [
+            'avatars.steamstatic.com',
+            'howlongtobeat.com'
+        ],
     },
 };
 
