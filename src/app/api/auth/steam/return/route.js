@@ -1,8 +1,9 @@
 import openid from 'openid';
+const BASE_URL = process.env.BASE_URL
 
 const relyingParty = new openid.RelyingParty(
-  'http://localhost:3000/api/auth/steam/return',
-  'http://localhost:3000',
+  `${BASE_URL}/api/auth/steam/return`,
+  `${BASE_URL}`,
   true,
   false,
   []
@@ -14,7 +15,7 @@ export async function GET(req) {
 
   return new Promise((resolve) => {
     relyingParty.verifyAssertion(
-      `http://localhost:3000/api/auth/steam/return?${parsedUrl.searchParams.toString()}`,
+      `${BASE_URL}/api/auth/steam/return?${parsedUrl.searchParams.toString()}`,
       (err, result) => {
         if (err || !result.authenticated) {
           console.error('OpenID verification failed:', err);
@@ -30,7 +31,7 @@ export async function GET(req) {
           }
 
           // Redirect to frontend with Steam ID (use cookie/JWT in production)
-          resolve(Response.redirect(`http://localhost:3000/login/success?steamid=${steamid}`));
+          resolve(Response.redirect(`${BASE_URL}/login/success?steamid=${steamid}`));
         }
       }
     );

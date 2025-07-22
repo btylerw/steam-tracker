@@ -1,8 +1,8 @@
 import openid from 'openid';
-
+const BASE_URL = process.env.BASE_URL;
 const relyingParty = new openid.RelyingParty(
-  'http://localhost:3000/api/auth/steam/return', // return URL
-  'http://localhost:3000',                      // realm
+  `${BASE_URL}/api/auth/steam/return`, // return URL
+  `${BASE_URL}`,                      // realm
   true,                                         // stateless
   false,                                        // strict mode
   []                                            // extensions
