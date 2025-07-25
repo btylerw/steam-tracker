@@ -15,7 +15,7 @@ export default function Home() {
   
   return (
     <div className="flex justify-center flex-col items-center gap-5 min-h-screen bg-gray-100 dark:bg-gray-900">
-      <h1 className="text-2xl font-bold text-red-600">Currently no authentication implemented. Simply click "Log In" to proceed.</h1>
+      <h1 className="text-2xl font-bold text-red-600">Currently no authentication implemented. Simply click &quot;Log In&quot; to proceed.</h1>
       <form action="submit" onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 shadow-md rounded-lg px-8 pt-6 pb-8 w-full max-w-sm">
         <h2 className="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white">Log In</h2>
         <input type="text" value={username} placeholder="Username" onChange={(e) => setUsername(e.target.value)} className="mb-4 px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-indigo-500" />
