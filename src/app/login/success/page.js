@@ -5,6 +5,7 @@ import Image from "next/image"
 import { useEffect, useState, Suspense } from "react"
 import ScrollableWindow from "@/app/components/ScrollableWindow"
 import axios from "axios"
+import SteamLoginBtn from '../../../../public/steam_login_btn1.png';
 
 function LoginSuccessInner() {
     const searchParams = useSearchParams();
@@ -37,6 +38,7 @@ function LoginSuccessInner() {
                 setProfile(res.data);
                 const result = await axios.get(`/api/steam/games?steamid=${steamid}`);
                 const sortedGames = result.data.sort((a, b) => b.playtime_forever - a.playtime_forever);
+                console.log(sortedGames[0]);
                 setAllGames(sortedGames);
                 setGamesLoaded(true);
             } catch (err) {
@@ -59,7 +61,7 @@ function LoginSuccessInner() {
                 const backlogIndexes = [];
                 response.data.map((data, i) => {
                     imageMap.set(null);
-                    console.log(data);
+                    //console.log(data);
                     if (data[0]) {
                         imageMap.set(allGames[i].name.toLowerCase(), data[0].imageUrl);
                         if (allGames[i].playtime_forever / 60 < data[0].gameplayMain) {
@@ -88,13 +90,20 @@ function LoginSuccessInner() {
         searchGames();
     }, [gamesLoaded]);
 
+    if (!steamid) {
+        return (
+            <div onClick={() => window.location.href = '/api/auth/steam'} className="flex items-center justify-center min-h-screen" >
+                <Image src={SteamLoginBtn} alt="Sign In To Steam" className="cursor-pointer"/>
+            </div>
+        )
+    }
+
     if (!profile || !backlogTime) {
         return (
-            <div className="flex items-center justify-center">
+            <div className="flex items-center justify-center min-h-screen">
                 <p>Loading Steam Profile...</p>
             </div>
         )
-    
     }
 
     return (
