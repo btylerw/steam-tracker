@@ -13,18 +13,30 @@ export default function Home() {
   const [createPassword, setCreatePassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [email, setEmail] = useState('');
-  const [error, setError] = useState('');
+  const [loginError, setLoginError] = useState('');
+  const [createError, setCreateError] = useState('');
   const router = useRouter();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    router.push('/login/success')
+    try {
+      const res = await axios.post('/api/auth/login', {
+        username: username,
+        password: password,
+      });
+      console.log(res.data);
+      router.push('/login/success')
+    } catch (err) {
+      console.log(err);
+      setLoginError(err.response.data.error);
+      throw new Error(err.response.data.error || 'Server error');
+    }
   }
 
   const handleCreate = async (e) => {
     e.preventDefault();
     if (createPassword != confirmPassword) {
-      setError("Passwords do not match");
+      setCreateError("Passwords do not match");
       return;
     }
 
@@ -34,11 +46,11 @@ export default function Home() {
         email,
         password: createPassword,
       });
-      setError('');
+      setCreateError('');
       setModalOpen(false);
       return res.data;
     } catch (err) {
-      setError(err.response.data.error);
+      setCreateError(err.response.data.error);
       if (err.response) {
         throw new Error(err.response.data.error || 'Server error');
       } else {
@@ -55,6 +67,9 @@ export default function Home() {
         <input type="text" value={username} placeholder="Username" onChange={(e) => setUsername(e.target.value)} className="mb-4 px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-indigo-500" />
         <input type="password" value={password} placeholder="Password" onChange={(e) => setPassword(e.target.value)} className="mb-4 px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-indigo-500" />
         <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-md w-full transition duration-200">Log In</button>
+        {loginError && (
+          <p className="text-red-500 text-m mt-2 mb-2 text-center">{loginError}</p>
+        )}
       </form>
       <div onClick={() => setModalOpen(true)}>
         <h3 className="text-m text-blue-600 cursor-pointer">Create Account</h3>
@@ -66,8 +81,8 @@ export default function Home() {
           <input type="email" required value={email} placeholder="Email Address" onChange={(e) => setEmail(e.target.value)} className="mb-4 px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-indigo-500" />
           <input type="password" required value={createPassword} placeholder="Password" onChange={(e) => setCreatePassword(e.target.value)} className="mb-4 px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-indigo-500" />
           <input type="password" required value={confirmPassword} placeholder="Confirm Password" onChange={(e) => setConfirmPassword(e.target.value)} className="mb-4 px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-          {error && (
-            <p className="text-red-500 text-m -mt-2 mb-2 text-center">{error}</p>
+          {createError && (
+            <p className="text-red-500 text-m -mt-2 mb-2 text-center">{createError}</p>
           )}
           <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-md w-full transition duration-200">Create Account</button>
         </form>
