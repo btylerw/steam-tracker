@@ -1,5 +1,6 @@
 "use client"
 import Image from "next/image";
+import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Modal from "./components/Modal";
@@ -20,15 +21,30 @@ export default function Home() {
     router.push('/login/success')
   }
 
-  const handleCreate = (e) => {
+  const handleCreate = async (e) => {
     e.preventDefault();
     if (createPassword != confirmPassword) {
       setError("Passwords do not match");
       return;
     }
 
-    setError('');
-    setModalOpen(false);
+    try {
+      const res = await axios.post('/api/auth/create', {
+        username: createUsername,
+        email,
+        password: createPassword,
+      });
+      setError('');
+      setModalOpen(false);
+      return res.data;
+    } catch (err) {
+      setError(err.response.data.error);
+      if (err.response) {
+        throw new Error(err.response.data.error || 'Server error');
+      } else {
+        throw new Error('Could not connect to server');
+      }
+    }
   }
   
   return (
