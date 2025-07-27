@@ -19,7 +19,7 @@ function LoginSuccessInner() {
     const router = useRouter();
 
     const handleLogOut = () => {
-        router.push("/");
+        router.replace("/");
     }
     const LogOutButton = () => {
         return (

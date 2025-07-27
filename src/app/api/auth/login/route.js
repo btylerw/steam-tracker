@@ -13,18 +13,19 @@ export async function POST(request) {
     }
 
     try {
+        const invalidLoginInfo = new Response(JSON.stringify({ error: 'Invalid credentials' }), { status: 401 });
         const user = await sql`
             SELECT password FROM users WHERE name = ${username}
         `;
 
         if (user.length === 0) {
-            return new Response(JSON.stringify({ error: 'Invalid credentials' }), { status: 401 });
+            return invalidLoginInfo;
         }
         
         const hashedPassword = user[0].password;
         const match = await bcrypt.compare(password, hashedPassword);
         if (!match) {
-            return new Response(JSON.stringify({ error: 'Invalid credentials' }), { status: 401 });
+            return invalidLoginInfo;
         }
         return new Response(JSON.stringify({ message: 'Login successful' }), { status: 200 });
     } catch (err) {
