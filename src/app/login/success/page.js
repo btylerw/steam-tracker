@@ -2,7 +2,8 @@
 
 import { useSearchParams } from "next/navigation"
 import Image from "next/image"
-import { useEffect, useState, Suspense } from "react"
+import { useEffect, useState, Suspense, use } from "react"
+import { useRouter } from "next/navigation"
 import ScrollableWindow from "@/app/components/ScrollableWindow"
 import axios from "axios"
 import SteamLoginBtn from '../../../../public/steam_login_btn1.png';
@@ -15,8 +16,16 @@ function LoginSuccessInner() {
     const [backlog, setBacklog] = useState([]);
     const [backlogTime, setBacklogTime] = useState(null);
     const [gamesLoaded, setGamesLoaded] = useState(false);
+    const router = useRouter();
 
-    
+    const handleLogOut = () => {
+        router.push("/");
+    }
+    const LogOutButton = () => {
+        return (
+            <button onClick={handleLogOut} className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-md transition duration-200 cursor-pointer">Log Out</button>
+        )
+    }
     const renderGames = (games) => {
         return games.map((game) => (
             <div key={game.appid} className="flex justify-between items-center mb-4">
@@ -92,8 +101,11 @@ function LoginSuccessInner() {
 
     if (!steamid) {
         return (
-            <div onClick={() => window.location.href = '/api/auth/steam'} className="flex items-center justify-center min-h-screen" >
-                <Image src={SteamLoginBtn} alt="Sign In To Steam" className="cursor-pointer"/>
+            <div className="flex items-center justify-center min-h-screen flex-col gap-5">
+                <div onClick={() => window.location.href = '/api/auth/steam'}  >
+                    <Image src={SteamLoginBtn} alt="Sign In To Steam" className="cursor-pointer"/>
+                </div>
+                <LogOutButton />
             </div>
         )
     }
@@ -126,6 +138,7 @@ function LoginSuccessInner() {
                     <ScrollableWindow games={renderGames(backlog)}/>
                 </div>
             </div>
+            <LogOutButton />
         </div>
     )
 }
