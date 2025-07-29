@@ -9,8 +9,7 @@ import axios from "axios"
 import SteamLoginBtn from '../../../../public/steam_login_btn1.png';
 
 function LoginSuccessInner() {
-    const searchParams = useSearchParams();
-    const steamid = searchParams.get('steamid');
+    const [steamid, setSteamid] = useState(null);
     const [profile, setProfile] = useState(null);
     const [allGames, setAllGames] = useState([]);
     const [backlog, setBacklog] = useState([]);
@@ -37,6 +36,19 @@ function LoginSuccessInner() {
             </div>
         ));
     };
+
+    useEffect(() => {
+        const getSteamId = async () => {
+            try {
+                const res = await axios.get('/api/auth/me');
+                setSteamid(res.data.steamid);
+            } catch(err) {
+                console.error('User not authenticated', err);
+                router.replace('/');
+            }
+        };
+        getSteamId();
+    }, []);
     
     useEffect(() => {
         if (!steamid) return;
