@@ -17,7 +17,8 @@ function LoginSuccessInner() {
     const [gamesLoaded, setGamesLoaded] = useState(false);
     const router = useRouter();
 
-    const handleLogOut = () => {
+    const handleLogOut = async () => {
+        await axios.get('/api/auth/logout');
         router.replace("/");
     }
     const LogOutButton = () => {
