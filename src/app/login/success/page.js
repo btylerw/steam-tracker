@@ -60,7 +60,6 @@ function LoginSuccessInner() {
                 const result = await axios.get(`/api/steam/games?steamid=${steamid}&userid=${res.data.id}`);
                 const { games, backlogList, backlogListTime } = result.data;
                 const sortedGames = games.sort((a, b) => b.playtime_minutes - a.playtime_minutes);
-                console.log('Result of API call: ', result.data);
                 setAllGames(sortedGames);
                 setBacklog(backlogList);
                 setBacklogTime(backlogListTime);

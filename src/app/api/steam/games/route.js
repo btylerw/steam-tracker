@@ -16,7 +16,7 @@ export async function GET(req) {
 
     try {
         let games = await getAllUserGames(userid);
-        if (!games) {
+        if (games.length === 0) {
             const response = await axios.get(
                 'https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/',
                 {
@@ -42,9 +42,6 @@ export async function GET(req) {
                 };
             });
             await saveUserGames(userid, games);
-            return new Response(JSON.stringify(games), {
-                headers: { 'Content-Type': 'application/json' },
-            });
         }
         const backlogList = await getUserBacklog(userid);
         const backlogListTime = backlogList.reduce((sum, game) => {

@@ -14,7 +14,6 @@ export async function GET(req) {
 
     try {
         const response = await findUserBySteamId(steamid);
-        console.log(response);
         return new Response(JSON.stringify(response), {
             headers: { 'Content-Type': 'application/json' },
         });

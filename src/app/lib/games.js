@@ -17,12 +17,14 @@ export async function saveUserGames(userid, games) {
             ON CONFLICT (user_id, appid) DO UPDATE SET playtime_minutes = EXCLUDED.playtime_minutes;
         `;
 
-        const status = playtime_minutes === 0 ? 'not played' : (playtime_minutes < avg_completion * 0.5 ? 'playing' : 'played');
-        await sql`
-            INSERT INTO backlog_entries (user_id, appid, status)
-            VALUES (${userid}, ${appid}, ${status})
-            ON CONFLICT (user_id, appid) DO UPDATE SET status = EXCLUDED.status;
-        `;
+        if (playtime_minutes < avg_completion * 0.5) {
+            const status = playtime_minutes === 0 ? 'not played' : 'playing';
+            await sql`
+                INSERT INTO backlog_entries (user_id, appid, status)
+                VALUES (${userid}, ${appid}, ${status})
+                ON CONFLICT (user_id, appid) DO UPDATE SET status = EXCLUDED.status;
+            `;
+        }
     }
 }
 
