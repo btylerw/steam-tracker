@@ -14,7 +14,6 @@ function LoginSuccessInner() {
     const [allGames, setAllGames] = useState([]);
     const [backlog, setBacklog] = useState([]);
     const [backlogTime, setBacklogTime] = useState(null);
-    const [gamesLoaded, setGamesLoaded] = useState(false);
     const router = useRouter();
 
     const handleLogOut = async () => {
@@ -31,9 +30,9 @@ function LoginSuccessInner() {
             <div key={game.appid} className="flex justify-between items-center mb-4">
                 <div>
                     <h3 className="text-lg font-semibold">{game.name}</h3>
-                    <p>Playtime: {(game.playtime_forever / 60).toFixed(1)} hours</p>
+                    <p>Playtime: {(game.playtime_minutes / 60).toFixed(1)} hours</p>
                 </div>
-                <img className="h-48 w-auto" src={game.imageUrl} alt={`${game.name} icon`} />
+                <img className="h-48 w-auto" src={game.image_url} alt={`${game.name} icon`} />
             </div>
         ));
     };
@@ -58,11 +57,13 @@ function LoginSuccessInner() {
             try { 
                 const res = await axios.get(`/api/steam/profile?steamid=${steamid}`);
                 setProfile(res.data);
-                const result = await axios.get(`/api/steam/games?steamid=${steamid}`);
-                const sortedGames = result.data.sort((a, b) => b.playtime_forever - a.playtime_forever);
-                console.log(sortedGames[0]);
+                const result = await axios.get(`/api/steam/games?steamid=${steamid}&userid=${res.data.id}`);
+                const { games, backlogList, backlogListTime } = result.data;
+                const sortedGames = games.sort((a, b) => b.playtime_minutes - a.playtime_minutes);
+                console.log('Result of API call: ', result.data);
                 setAllGames(sortedGames);
-                setGamesLoaded(true);
+                setBacklog(backlogList);
+                setBacklogTime(backlogListTime);
             } catch (err) {
                 console.error(`Error fetching profile: ${err}`);
             }
@@ -70,47 +71,6 @@ function LoginSuccessInner() {
         
         fetchProfile();
     }, [steamid]);
-    
-    useEffect(() => {
-        const searchGames = async () => {
-            try {
-                const gameNames = allGames.map(game => {
-                    return game.name.toLowerCase().replace(/[^a-z0-9\s]/gi, '').replace(/\s+/g, ' ').trim();
-                })
-                const response = await axios.post('/api/hltb', { gameNames });
-                let timeSum = 0;
-                const imageMap = new Map();
-                const backlogIndexes = [];
-                response.data.map((data, i) => {
-                    imageMap.set(null);
-                    //console.log(data);
-                    if (data[0]) {
-                        imageMap.set(allGames[i].name.toLowerCase(), data[0].imageUrl);
-                        if (allGames[i].playtime_forever / 60 < data[0].gameplayMain) {
-                            timeSum += data[0].gameplayMain;
-                            backlogIndexes.push(i);
-                        }
-                    }
-                });
-                setAllGames(prevGames => 
-                    prevGames.map(game => ({
-                        ...game,
-                        imageUrl: imageMap.get(game.name.toLowerCase()) || null
-                    }))
-                );
-
-                const tempBacklog = backlogIndexes.map(index => allGames[index]);
-                setBacklog(tempBacklog.map(game => ({
-                        ...game,
-                        imageUrl: imageMap.get(game.name.toLowerCase()) || null
-                })));
-                setBacklogTime(timeSum);
-            } catch (err) {
-                console.error(`Failed to fetch HLTB data: ${err}`);
-            }
-        }
-        searchGames();
-    }, [gamesLoaded]);
 
     if (!steamid) {
         return (
@@ -133,9 +93,9 @@ function LoginSuccessInner() {
 
     return (
         <div className="flex items-center justify-center flex-col gap-5">
-            <h1>{profile.personaname}</h1>
+            <h1>{profile.display_name}</h1>
             <Image 
-                src={profile.avatarfull} 
+                src={profile.avatar_url} 
                 alt="avatar"
                 width={256}
                 height={256}

@@ -24,6 +24,7 @@ export default function Home() {
       // Error or no session: force Steam login
       window.location.href = "/api/auth/steam";
     }
+    setLoading(false);
   };
 
   return (
