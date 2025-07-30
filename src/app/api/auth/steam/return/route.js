@@ -69,12 +69,14 @@ async function handleAuthenticatedUser(claimedId) {
     { expiresIn: '7d' }
   );
 
-  const redirectResponse = Response.redirect(`${BASE_URL}/login/success`);
-  const response = new Response(redirectResponse.body, redirectResponse);
-  response.headers.set(
-    'Set-Cookie',
-    `token=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=604800; Secure`
-  );
+  return new Response(null, {
+    status: 302,
+    headers: {
+      Location: `${BASE_URL}/login/success`,
+      'Set-Cookie': `token=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=604800; Secure`,
+    },
+  });
+
 
   return response;
 }
