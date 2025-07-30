@@ -59,7 +59,7 @@ async function handleAuthenticatedUser(claimedId) {
       steamId: steamid,
       displayName: player.personaname,
       avatarUrl: player.avatarfull,
-      profileUrl: player.profileUrl,
+      profileUrl: player.profileurl,
     });
   }
 
