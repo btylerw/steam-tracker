@@ -15,6 +15,8 @@ function LoginSuccessInner() {
     const [backlog, setBacklog] = useState([]);
     const [backlogTime, setBacklogTime] = useState(null);
     const router = useRouter();
+    console.log(backlogTime);
+    console.log(profile);
 
     const handleLogOut = async () => {
         await axios.get('/api/auth/logout');

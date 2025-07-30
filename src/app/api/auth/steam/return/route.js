@@ -76,7 +76,4 @@ async function handleAuthenticatedUser(claimedId) {
       'Set-Cookie': `token=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=604800; Secure`,
     },
   });
-
-
-  return response;
 }
