@@ -73,17 +73,6 @@ function LoginSuccessInner() {
         fetchProfile();
     }, [steamid]);
 
-    if (!steamid) {
-        return (
-            <div className="flex items-center justify-center min-h-screen flex-col gap-5">
-                <div onClick={() => window.location.href = '/api/auth/steam'}  >
-                    <Image src={SteamLoginBtn} alt="Sign In To Steam" className="cursor-pointer"/>
-                </div>
-                <LogOutButton />
-            </div>
-        )
-    }
-
     if (!profile || !backlogTime) {
         return (
             <div className="flex items-center justify-center min-h-screen">
