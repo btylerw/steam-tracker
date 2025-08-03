@@ -1,8 +1,7 @@
 'use client'
 
-import { useSearchParams } from "next/navigation"
 import Image from "next/image"
-import { useEffect, useState, Suspense, use } from "react"
+import { useEffect, useState, Suspense } from "react"
 import { useRouter } from "next/navigation"
 import ScrollableWindow from "@/app/components/ScrollableWindow"
 import axios from "axios"
@@ -57,7 +56,10 @@ function LoginSuccessInner() {
             try { 
                 const res = await axios.get(`/api/steam/profile?steamid=${steamid}`);
                 setProfile(res.data);
-                await getSteamData('false', res.data.id);
+                // Syncs with Steam library automatically if current login time is more than 24 hours past last sync time
+                let sync = !res.data.last_synced || (Date.now() - new Date(res.data.last_synced).getTime() > 24 * 3600 * 1000);
+                sync = sync.toString();
+                await getSteamData(sync, res.data.id);
             } catch (err) {
                 console.error(`Error fetching profile: ${err}`);
             }
@@ -68,6 +70,9 @@ function LoginSuccessInner() {
 
     const getSteamData = async (sync, id) => {
         try {
+            if (sync === 'true') {
+                const setSync = await axios.get(`/api/steam/sync?userid=${id}`);
+            }
             const result = await axios.get(`/api/steam/games?steamid=${steamid}&userid=${id}&sync=${sync}`);
             const { games, backlogList, backlogListTime } = result.data;
             const sortedGames = games.sort((a, b) => b.playtime_minutes - a.playtime_minutes);

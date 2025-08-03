@@ -15,3 +15,9 @@ export async function createUser({ steamId, displayName, avatarUrl, profileUrl }
     `;
     return result[0];
 }
+
+export async function updateSync(userid) {
+    await sql`
+        UPDATE users SET last_synced = ${new Date()} WHERE id = ${userid};
+    `;
+}
