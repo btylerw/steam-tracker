@@ -6,17 +6,18 @@ export async function GET(req) {
     const { searchParams } = new URL(req.url);
     const steamid = searchParams.get('steamid');
     const userid = searchParams.get('userid');
+    const sync = searchParams.get('sync') === 'true';
     const API_Key = process.env.STEAM_API_KEY;
     if (!steamid || !API_Key) {
-        return new Promise(JSON.stringify({ error: 'Missing steamid or API Key' }), {
+        return new Response(JSON.stringify({ error: 'Missing steamid or API Key' }), {
             status: 400,
-            headers: { 'Content-Type': 'applications/json' },
+            headers: { 'Content-Type': 'application/json' },
         });
     }
 
     try {
         let games = await getAllUserGames(userid);
-        if (games.length === 0) {
+        if (games.length === 0 || sync) {
             const response = await axios.get(
                 'https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/',
                 {

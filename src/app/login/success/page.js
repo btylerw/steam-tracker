@@ -15,8 +15,6 @@ function LoginSuccessInner() {
     const [backlog, setBacklog] = useState([]);
     const [backlogTime, setBacklogTime] = useState(null);
     const router = useRouter();
-    console.log(backlogTime);
-    console.log(profile);
 
     const handleLogOut = async () => {
         await axios.get('/api/auth/logout');
@@ -59,7 +57,7 @@ function LoginSuccessInner() {
             try { 
                 const res = await axios.get(`/api/steam/profile?steamid=${steamid}`);
                 setProfile(res.data);
-                const result = await axios.get(`/api/steam/games?steamid=${steamid}&userid=${res.data.id}`);
+                const result = await axios.get(`/api/steam/games?steamid=${steamid}&userid=${res.data.id}&sync=false`);
                 const { games, backlogList, backlogListTime } = result.data;
                 const sortedGames = games.sort((a, b) => b.playtime_minutes - a.playtime_minutes);
                 setAllGames(sortedGames);
@@ -72,6 +70,19 @@ function LoginSuccessInner() {
         
         fetchProfile();
     }, [steamid]);
+
+    const handleSync = async () => {
+        try {
+            const result = await axios.get(`/api/steam/games?steamid=${steamid}&userid=${profile.id}&sync=true`);
+            const { games, backlogList, backlogListTime } = result.data;
+            const sortedGames = games.sort((a, b) => b.playtime_minutes - a.playtime_minutes);
+            setAllGames(sortedGames);
+            setBacklog(backlogList);
+            setBacklogTime(backlogListTime);
+        } catch (err) {
+            console.error(`Error syncing steam data: ${err}`);
+        }
+    }
 
     if (!profile || !backlogTime) {
         return (
@@ -91,6 +102,7 @@ function LoginSuccessInner() {
                 height={256}
             />
             <h1 className="text-2xl">You have {backlogTime} hours worth of content in unplayed games</h1>
+            <button onClick={handleSync} className="cursor-pointer">Sync Steam Info</button>
             <div className="flex items-center justify-center gap-20">
                 <div className="flex items-center justify-center flex-col gap-10">
                     <div className="text-2xl">Owned Games:</div>
