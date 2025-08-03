@@ -65,7 +65,6 @@ export async function GET(req) {
                 };
             });
             games = [...knownGames, ...newGames];
-            console.log('All games: ', games);
             await saveUserGames(userid, games);
         }
         const backlogList = await getUserBacklog(userid);

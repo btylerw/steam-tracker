@@ -57,12 +57,7 @@ function LoginSuccessInner() {
             try { 
                 const res = await axios.get(`/api/steam/profile?steamid=${steamid}`);
                 setProfile(res.data);
-                const result = await axios.get(`/api/steam/games?steamid=${steamid}&userid=${res.data.id}&sync=false`);
-                const { games, backlogList, backlogListTime } = result.data;
-                const sortedGames = games.sort((a, b) => b.playtime_minutes - a.playtime_minutes);
-                setAllGames(sortedGames);
-                setBacklog(backlogList);
-                setBacklogTime(backlogListTime);
+                await getSteamData('false', res.data.id);
             } catch (err) {
                 console.error(`Error fetching profile: ${err}`);
             }
@@ -71,9 +66,9 @@ function LoginSuccessInner() {
         fetchProfile();
     }, [steamid]);
 
-    const handleSync = async () => {
+    const getSteamData = async (sync, id) => {
         try {
-            const result = await axios.get(`/api/steam/games?steamid=${steamid}&userid=${profile.id}&sync=true`);
+            const result = await axios.get(`/api/steam/games?steamid=${steamid}&userid=${id}&sync=${sync}`);
             const { games, backlogList, backlogListTime } = result.data;
             const sortedGames = games.sort((a, b) => b.playtime_minutes - a.playtime_minutes);
             setAllGames(sortedGames);
@@ -102,7 +97,7 @@ function LoginSuccessInner() {
                 height={256}
             />
             <h1 className="text-2xl">You have {backlogTime} hours worth of content in unplayed games</h1>
-            <button onClick={handleSync} className="cursor-pointer">Sync Steam Info</button>
+            <button onClick={() => getSteamData('true', profile.id)} className="cursor-pointer">Sync Steam Info</button>
             <div className="flex items-center justify-center gap-20">
                 <div className="flex items-center justify-center flex-col gap-10">
                     <div className="text-2xl">Owned Games:</div>
