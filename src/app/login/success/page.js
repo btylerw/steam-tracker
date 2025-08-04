@@ -93,23 +93,24 @@ function LoginSuccessInner() {
     }
 
     return (
-        <div className="flex items-center justify-center flex-col gap-5">
-            <h1>{profile.display_name}</h1>
+        <div className="flex items-center justify-center flex-col gap-5 px-4 py-8">
+            <h1 className="text-xl sm:text-2xl md:text-3xl text-center">{profile.display_name}</h1>
             <Image 
                 src={profile.avatar_url} 
                 alt="avatar"
                 width={256}
                 height={256}
+                className="w-32 h-32 sm:w-48 sm:h-48 md:w-64 md:h-64 rounded-full"
             />
-            <h1 className="text-2xl">You have {backlogTime} hours worth of content in unplayed games</h1>
+            <h1 className="text-lg sm:text-xl md:text-2xl text-center">You have {backlogTime} hours worth of content in unplayed games</h1>
             <button onClick={() => getSteamData('true', profile.id)} className="cursor-pointer">Sync Steam Info</button>
-            <div className="flex items-center justify-center gap-20">
-                <div className="flex items-center justify-center flex-col gap-10">
-                    <div className="text-2xl">Owned Games:</div>
+            <div className="flex flex-col lg:flex-row items-center justify-center gap-10 w-full max-w-screen-xl mt-6">
+                <div className="flex items-center justify-center flex-col gap-6 w-full max-w-md">
+                    <div className="text-xl sm:text-2xl">Owned Games:</div>
                     <ScrollableWindow games={renderGames(allGames)}/>
                 </div>
-                <div className="flex items-center justify-center flex-col gap-10">
-                    <div className="text-2xl">Backlog:</div>
+                <div className="flex items-center justify-center flex-col gap-6 w-full max-w-md">
+                    <div className="text-xl sm:text-2xl">Backlog:</div>
                     <ScrollableWindow games={renderGames(backlog)}/>
                 </div>
             </div>
