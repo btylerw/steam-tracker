@@ -21,7 +21,7 @@ function LoginSuccessInner() {
     }
     const LogOutButton = () => {
         return (
-            <button onClick={handleLogOut} className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-md transition duration-200 cursor-pointer">Log Out</button>
+            <button onClick={handleLogOut} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-1 transition cursor-pointer">Log Out</button>
         )
     }
     const renderGames = (games) => {
@@ -103,7 +103,7 @@ function LoginSuccessInner() {
                 className="w-32 h-32 sm:w-48 sm:h-48 md:w-64 md:h-64 rounded-full"
             />
             <h1 className="text-lg sm:text-xl md:text-2xl text-center">You have {backlogTime} hours worth of content in unplayed games</h1>
-            <button onClick={() => getSteamData('true', profile.id)} className="cursor-pointer">Sync Steam Info</button>
+            <button onClick={() => getSteamData('true', profile.id)} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-1 transition cursor-pointer">Sync Steam Info</button>
             <div className="flex flex-col lg:flex-row items-center justify-center gap-10 w-full max-w-screen-xl mt-6">
                 <div className="flex items-center justify-center flex-col gap-6 w-full max-w-md">
                     <div className="text-xl sm:text-2xl">Owned Games:</div>
