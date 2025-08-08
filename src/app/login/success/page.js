@@ -5,7 +5,6 @@ import { useEffect, useState, Suspense } from "react"
 import { useRouter } from "next/navigation"
 import ScrollableWindow from "@/app/components/ScrollableWindow"
 import axios from "axios"
-import SteamLoginBtn from '../../../../public/steam_login_btn1.png';
 
 function LoginSuccessInner() {
     const [steamid, setSteamid] = useState(null);
