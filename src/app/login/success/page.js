@@ -4,7 +4,7 @@ import Image from "next/image"
 import { useEffect, useState, Suspense } from "react"
 import { useRouter } from "next/navigation"
 import ScrollableWindow from "@/app/components/ScrollableWindow"
-import axios from "axios"
+import axios, { all } from "axios"
 
 function LoginSuccessInner() {
     const [steamid, setSteamid] = useState(null);
@@ -106,10 +106,12 @@ function LoginSuccessInner() {
             <div className="flex flex-col lg:flex-row items-center justify-center gap-10 w-full max-w-screen-xl mt-6">
                 <div className="flex items-center justify-center flex-col gap-6 w-full max-w-md">
                     <div className="text-xl sm:text-2xl">Owned Games:</div>
+                    <div className="text-l sm:text-xl">Total: {allGames.length}</div>
                     <ScrollableWindow games={renderGames(allGames)}/>
                 </div>
                 <div className="flex items-center justify-center flex-col gap-6 w-full max-w-md">
                     <div className="text-xl sm:text-2xl">Backlog:</div>
+                    <div className="text-l sm:text-xl">Total: {backlog.length}</div>
                     <ScrollableWindow games={renderGames(backlog)}/>
                 </div>
             </div>
