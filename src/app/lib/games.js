@@ -34,7 +34,7 @@ export async function saveUserGames(userid, games) {
     ON CONFLICT (user_id, appid) DO UPDATE SET playtime_minutes = EXCLUDED.playtime_minutes;
     `;
 
-    const backlogEntries = games.filter(g => g.avg_completion_minutes != null && g.playtime_minutes < g.avg_completion_minutes * 0.5)
+    const backlogEntries = games.filter(g => g.avg_completion_minutes != null && g.playtime_minutes < g.avg_completion_minutes * 0.75)
     .map(g => ({
         appid: g.appid,
         status: g.playtime_minutes === 0 ? 'not played' : 'playing',

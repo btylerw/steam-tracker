@@ -74,8 +74,9 @@ function LoginSuccessInner() {
             const result = await axios.get(`/api/steam/games?steamid=${steamid}&userid=${id}&sync=${sync}`);
             const { games, backlogList, backlogListTime } = result.data;
             const sortedGames = games.sort((a, b) => b.playtime_minutes - a.playtime_minutes);
+            const sortedBacklog = backlogList.sort((a, b) => b.playtime_minutes - a.playtime_minutes);
             setAllGames(sortedGames);
-            setBacklog(backlogList);
+            setBacklog(sortedBacklog);
             setBacklogTime(backlogListTime);
         } catch (err) {
             console.error(`Error syncing steam data: ${err}`);
