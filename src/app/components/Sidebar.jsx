@@ -1,38 +1,41 @@
-const Sidebar = ({ currentView, setCurrentView, handleLogOut, sideBarOpen, setSideBarOpen }) => {
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+const navItems = [
+  { name: "Owned Games", view: "owned" },
+  { name: "Backlog", view: "backlog" }
+];
+
+export default function Sidebar({ currentView, setCurrentView, handleLogOut, sideBarOpen, setSideBarOpen }) {
     return (
-        <div
-            className={`
-                fixed top-0 left-0 h-full bg-gray-800 text-white w-64 p-6 transform transition-transform duration-300
-                ${sideBarOpen ? "translate-x-0" : "-translate-x-full"} 
-                md:translate-x-0 flex
-                flex-col z-40
-            `}
+        <aside
+        className={`flex flex-col fixed lg:static lg:h-screen top-0 left-0 h-full bg-gray-900 text-white w-64 p-4 transform transition-transform duration-300 z-40
+            ${sideBarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}
         >
-            <div>
-                <button 
-                    onClick={() => { setCurrentView("owned"); setSideBarOpen(false) }}
-                    className={`px-3 py-2 rounded-md mb-2 text-left w-full transition cursor-pointer ${
-                        currentView === "owned" ? "bg-blue-600" : "hover:bg-gray-700"
+            <nav className="flex-1 flex flex-col gap-2">
+                {navItems.map((item) => (
+                <button
+                    key={item.name}
+                    className={`w-full px-4 py-2 rounded text-left cursor-pointer ${
+                    currentView === item.view ? "bg-gray-700" : "hover:bg-gray-700"
                     }`}
+                    onClick={() => {
+                    setCurrentView(item.view);
+                    setSideBarOpen(false);
+                    }}
                 >
-                    Owned Games
+                    {item.name}
                 </button>
-                <button 
-                    onClick={() => { setCurrentView("backlog"); setSideBarOpen(false) }}
-                    className={`px-3 py-2 rounded-md mb-2 text-left w-full transition cursor-pointer ${
-                        currentView === "backlog" ? "bg-blue-600" : "hover:bg-gray-700"
-                    }`}
-                >
-                    Backlog
-                </button>
-            </div>
+                ))}
+            </nav>
             <div className="mt-auto">
-                <button onClick={handleLogOut} className="px-3 py-2 rounded-md w-full bg-red-600 hover:bg-red-700 transition cursor-pointer">
+                <button
+                onClick={handleLogOut}
+                className="w-full mt-4 px-4 py-2 bg-red-500 hover:bg-red-600 rounded cursor-pointer"
+                >
                     Log Out
                 </button>
             </div>
-        </div>
-    );
-};
-
-export default Sidebar;
+    </aside>
+  );
+}

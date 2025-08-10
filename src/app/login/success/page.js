@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import ScrollableWindow from "@/app/components/ScrollableWindow"
 import axios from "axios"
 import Sidebar from "@/app/components/Sidebar"
+import Dashboard from "@/app/components/Dashboard"
 
 function LoginSuccessInner() {
     const [steamid, setSteamid] = useState(null);
@@ -92,49 +93,35 @@ function LoginSuccessInner() {
     }
 
     return (
-        <div className="flex min-h-screen">
-            <button className="lg:hidden p-2 text-white bg-gray-700 rounded-md fixed top-4 left-4 z-50" onClick={() => setSideBarOpen(!sideBarOpen)}>
-                ☰
+        <Dashboard
+            profile={profile}
+            currentView={currentView}
+            setCurrentView={setCurrentView}
+            handleLogOut={handleLogOut}
+        >  
+            <h2 className="text-lg">
+                You have {backlogTime} hours worth of content in unplayed games
+            </h2>
+            <button
+                onClick={() => getSteamData("true", profile.id)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer"
+            >
+                Sync Steam Info
             </button>
-            {sideBarOpen && (
-                <div
-                    className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
-                    onClick={() => setSideBarOpen(false)}
-                />
+
+            {currentView === "owned" && (
+                <div className="w-full max-w-2xl flex flex-col items-center">
+                    <div className="text-xl mb-2">Owned Games: {allGames.length}</div>
+                    <ScrollableWindow games={renderGames(allGames)} />
+                </div>
             )}
-            <Sidebar currentView={currentView} setCurrentView={setCurrentView} handleLogOut={handleLogOut} sideBarOpen={sideBarOpen} setSideBarOpen={setSideBarOpen} />
-            <div className="flex-1 p-6 flex flex-col items-center gap-6">
-                <h1 className="text-2xl text-center">{profile.display_name}</h1>
-                <Image 
-                    src={profile.avatar_url} 
-                    alt="avatar"
-                    width={128}
-                    height={128}
-                    className="rounded-full"
-                />
-                <h2 className="text-lg">
-                    You have {backlogTime} hours worth of content in unplayed games
-                </h2>
-                <button 
-                    onClick={() => getSteamData('true', profile.id)} 
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                >
-                    Sync Steam Info
-                </button>
-                {currentView === "owned" && (
-                    <div className="w-full max-w-2xl flex justify-center items-center flex-col">
-                        <div className="text-xl mb-2">Owned Games: {allGames.length}</div>
-                        <ScrollableWindow games={renderGames(allGames)} />
-                    </div>
-                )}
-                {currentView === "backlog" && (
-                    <div className="w-full max-w-2xl flex justify-center items-center flex-col">
-                        <div className="text-xl mb-2">Backlog: {backlog.length}</div>
-                        <ScrollableWindow games={renderGames(backlog)} />
-                    </div>
-                )}
-            </div>
-        </div>
+            {currentView === "backlog" && (
+                <div className="w-full max-w-2xl flex flex-col items-center">
+                    <div className="text-xl mb-2">Backlog: {backlog.length}</div>
+                    <ScrollableWindow games={renderGames(backlog)} />
+                </div>
+            )}
+        </Dashboard>
     )
 }
 
