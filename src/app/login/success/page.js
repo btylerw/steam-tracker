@@ -5,7 +5,6 @@ import { useEffect, useState, Suspense } from "react"
 import { useRouter } from "next/navigation"
 import ScrollableWindow from "@/app/components/ScrollableWindow"
 import axios from "axios"
-import Sidebar from "@/app/components/Sidebar"
 import Dashboard from "@/app/components/Dashboard"
 
 function LoginSuccessInner() {
@@ -15,7 +14,7 @@ function LoginSuccessInner() {
     const [backlog, setBacklog] = useState([]);
     const [backlogTime, setBacklogTime] = useState(null);
     const [currentView, setCurrentView] = useState("owned");
-    const [sideBarOpen, setSideBarOpen] = useState(false);
+    const [selectedGames, setSelectedGames] = useState([]);
     const router = useRouter();
 
     const handleLogOut = async () => {
@@ -23,12 +22,56 @@ function LoginSuccessInner() {
         router.replace("/");
     }
 
+    const toggleSelect = (appid) => {
+        setSelectedGames((prev) =>
+            prev.includes(appid) ? prev.filter(id => id !== appid) : [...prev, appid]
+        );
+    };
+
+    const handleAddToBacklog = async () => {
+        try {
+            const backlogIds = backlog.map(g => g.appid);
+            const toAdd = selectedGames.filter(id => !backlogIds.includes(id));
+            if (toAdd.length === 0) {
+                return;
+            }
+            await axios.post('/api/steam/backlog/add', { gameIds: toAdd, userId: profile.id });
+            setSelectedGames([]);
+            await getSteamData("false", profile.id);
+        } catch (err) {
+            console.error("Error adding to backlog: ", err);
+        }
+    }
+
+    const handleRemoveFromBacklog = async () => {
+        try {
+            const backlogIds = backlog.map(g => g.appid);
+            const toRemove = selectedGames.filter(id => backlogIds.includes(id));
+            if (toRemove.length === 0) {
+                return;
+            }
+            await axios.post('/api/steam/backlog/remove', { gameIds: toRemove, userId: profile.id });
+            setSelectedGames([]);
+            await getSteamData("false", profile.id);
+        } catch (err) {
+            console.error("Error removing from backlog: ", err);
+        }
+    }
+
     const renderGames = (games) => {
         return games.map((game) => (
-            <div key={game.appid} className="flex justify-between items-center mb-4">
-                <div>
-                    <h3 className="text-lg font-semibold">{game.name}</h3>
-                    <p>Playtime: {(game.playtime_minutes / 60).toFixed(1)} hours</p>
+            <div key={game.appid} className="flex justify-between items-center mb-4 border p-2 rounded">
+                <div className="flex items-center gap-3">
+                    <input 
+                        type="checkbox" 
+                        checked={selectedGames.includes(game.appid)}
+                        onChange={() => toggleSelect(game.appid)}
+                        className="w-5 h-5 cursor-pointer accent-green-500 rounded-full"
+                    />
+                    <div>
+                        <h3 className="text-lg font-semibold">{game.name}</h3>
+                        <p>Playtime: {(game.playtime_minutes / 60).toFixed(1)} hours</p>
+                    </div>
                 </div>
                 <img className="h-48 w-auto" src={game.image_url} alt={`${game.name} icon`} />
             </div>
@@ -108,6 +151,17 @@ function LoginSuccessInner() {
             >
                 Sync Steam Info
             </button>
+
+            {selectedGames.length > 0 && (
+                <div className="flex gap-3 my-3">
+                    <button onClick={handleAddToBacklog} className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                        Add To Backlog
+                    </button>
+                    <button onClick={handleRemoveFromBacklog} className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                        Remove From Backlog
+                    </button>
+                </div>
+            )}
 
             {currentView === "owned" && (
                 <div className="w-full max-w-2xl flex flex-col items-center">

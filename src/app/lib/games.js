@@ -94,3 +94,34 @@ export async function getAllGames() {
     `;
     return data;
 }
+
+export async function removeFromBacklog(userid, gameIds) {
+    if (gameIds.length === 0) {
+        return;
+    }
+    await sql`
+        DELETE FROM backlog_entries
+        WHERE user_id = ${userid}
+        AND appid = ANY(${gameIds});
+    `;
+}
+
+export async function addToBacklog(userid, gameIds) {
+    if (gameIds.length === 0) {
+        return;
+    }
+    const status = 'not played';
+    const backlogValues = gameIds.map(id => [Number(userid), Number(id), status]);
+    console.log(backlogValues)
+    await sql`
+        INSERT INTO backlog_entries (user_id, appid, status)
+        SELECT
+            user_id::int,
+            appid::int,
+            status::text
+        FROM (
+            VALUES ${sql(backlogValues)}
+        ) as t(user_id, appid, status)
+        ON CONFLICT (user_id, appid) DO UPDATE SET status = EXCLUDED.status;
+    `;
+}
