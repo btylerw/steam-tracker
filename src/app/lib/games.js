@@ -1,3 +1,4 @@
+import { getMaxAge } from "next/dist/server/image-optimizer";
 import sql from "./db";
 
 export async function saveUserGames(userid, games) {
@@ -45,12 +46,16 @@ export async function saveUserGames(userid, games) {
         await sql`
         INSERT INTO backlog_entries (user_id, appid, status)
         SELECT
-            user_id::int,
-            appid::int,
-            status::text
+            t.user_id::int,
+            t.appid::int,
+            t.status::text
         FROM (
             VALUES ${sql(backlogValues)}
         ) as t(user_id, appid, status)
+        JOIN user_library ul
+            ON ul.user_id = t.user_id::int
+            AND ul.appid = t.appid::int
+        WHERE ul.removed_from_backlog = false
         ON CONFLICT (user_id, appid) DO UPDATE SET status = EXCLUDED.status;
         `;
     }
@@ -104,6 +109,13 @@ export async function removeFromBacklog(userid, gameIds) {
         WHERE user_id = ${userid}
         AND appid = ANY(${gameIds});
     `;
+
+    await sql`
+        UPDATE user_library
+        SET removed_from_backlog = true
+        WHERE user_id = ${userid}
+        AND appid = ANY(${gameIds});
+    `;
 }
 
 export async function addToBacklog(userid, gameIds) {
@@ -112,7 +124,6 @@ export async function addToBacklog(userid, gameIds) {
     }
     const status = 'not played';
     const backlogValues = gameIds.map(id => [Number(userid), Number(id), status]);
-    console.log(backlogValues)
     await sql`
         INSERT INTO backlog_entries (user_id, appid, status)
         SELECT
@@ -123,5 +134,12 @@ export async function addToBacklog(userid, gameIds) {
             VALUES ${sql(backlogValues)}
         ) as t(user_id, appid, status)
         ON CONFLICT (user_id, appid) DO UPDATE SET status = EXCLUDED.status;
+    `;
+
+    await sql`
+        UPDATE user_library
+        SET removed_from_backlog = false
+        WHERE user_id = ${userid}
+        AND appid = ANY(${gameIds});
     `;
 }
