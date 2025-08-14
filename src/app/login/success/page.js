@@ -150,9 +150,11 @@ function LoginSuccessInner() {
             setCurrentView={setCurrentView}
             handleLogOut={handleLogOut}
         >  
-            <h2 className="text-lg">
-                You have {backlogTime} hours worth of content in unplayed games
-            </h2>
+            {currentView === "home" && (
+                <h2 className="text-lg">
+                    You have {backlogTime} hours worth of content in unplayed games
+                </h2>
+            )}
             <button
                 onClick={() => getSteamData("true", profile.id)}
                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer"

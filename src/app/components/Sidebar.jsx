@@ -2,6 +2,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const navItems = [
+    { name: "Home", view: "home"},
   { name: "Owned Games", view: "owned" },
   { name: "Backlog", view: "backlog" }
 ];
