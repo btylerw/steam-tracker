@@ -1,4 +1,3 @@
-import { getMaxAge } from "next/dist/server/image-optimizer";
 import sql from "./db";
 
 export async function saveUserGames(userid, games) {
