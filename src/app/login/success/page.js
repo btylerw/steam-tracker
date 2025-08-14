@@ -15,6 +15,8 @@ function LoginSuccessInner() {
     const [backlogTime, setBacklogTime] = useState(null);
     const [currentView, setCurrentView] = useState("owned");
     const [selectedGames, setSelectedGames] = useState([]);
+    const [searchOwned, setSearchOwned] = useState("");
+    const [searchBacklog, setSearchBacklog] = useState("");
     const router = useRouter();
 
     const handleLogOut = async () => {
@@ -22,6 +24,12 @@ function LoginSuccessInner() {
         router.replace("/");
     }
 
+    const filterGames = (games, search) => {
+        return games.filter(game =>
+            game.name.toLowerCase().includes(search.toLowerCase())
+        );
+    }
+    
     const toggleSelect = (appid) => {
         setSelectedGames((prev) =>
             prev.includes(appid) ? prev.filter(id => id !== appid) : [...prev, appid]
@@ -162,17 +170,18 @@ function LoginSuccessInner() {
                     </button>
                 </div>
             )}
-
             {currentView === "owned" && (
                 <div className="w-full max-w-2xl flex flex-col items-center">
+                    <input type="text" placeholder="Search Games" value={searchOwned} onChange={(e) => setSearchOwned(e.target.value)} className="mb-4 p2- border rounded text-center" />
                     <div className="text-xl mb-2">Owned Games: {allGames.length}</div>
-                    <ScrollableWindow games={renderGames(allGames)} />
+                    <ScrollableWindow games={renderGames(filterGames(allGames, searchOwned))} />
                 </div>
             )}
             {currentView === "backlog" && (
                 <div className="w-full max-w-2xl flex flex-col items-center">
+                    <input type="text" placeholder="Search Games" value={searchBacklog} onChange={(e) => setSearchBacklog(e.target.value)} className="mb-4 p2- border rounded text-center" />
                     <div className="text-xl mb-2">Backlog: {backlog.length}</div>
-                    <ScrollableWindow games={renderGames(backlog)} />
+                    <ScrollableWindow games={renderGames(filterGames(backlog, searchBacklog))} />
                 </div>
             )}
         </Dashboard>
