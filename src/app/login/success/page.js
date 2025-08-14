@@ -160,26 +160,31 @@ function LoginSuccessInner() {
                 Sync Steam Info
             </button>
 
-            {selectedGames.length > 0 && (
-                <div className="flex gap-3 my-3">
-                    <button onClick={handleAddToBacklog} className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
-                        Add To Backlog
-                    </button>
-                    <button onClick={handleRemoveFromBacklog} className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
-                        Remove From Backlog
-                    </button>
-                </div>
-            )}
             {currentView === "owned" && (
                 <div className="w-full max-w-2xl flex flex-col items-center">
-                    <input type="text" placeholder="Search Games" value={searchOwned} onChange={(e) => setSearchOwned(e.target.value)} className="mb-4 p2- border rounded text-center" />
+                    {selectedGames.length > 0 && (
+                        <div className="flex gap-3 my-3">
+                            <button onClick={handleAddToBacklog} className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 cursor-pointer">
+                                Add To Backlog
+                            </button>
+                        </div>
+                    )}
+                    <input type="text" placeholder="Search Games" value={searchOwned} onChange={(e) => setSearchOwned(e.target.value)} className="mb-4 p-2 border rounded text-center" />
                     <div className="text-xl mb-2">Owned Games: {allGames.length}</div>
                     <ScrollableWindow games={renderGames(filterGames(allGames, searchOwned))} />
                 </div>
             )}
+
             {currentView === "backlog" && (
                 <div className="w-full max-w-2xl flex flex-col items-center">
-                    <input type="text" placeholder="Search Games" value={searchBacklog} onChange={(e) => setSearchBacklog(e.target.value)} className="mb-4 p2- border rounded text-center" />
+                    {selectedGames.length > 0 && (
+                        <div className="flex gap-3 my-3">
+                            <button onClick={handleRemoveFromBacklog} className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 cursor-pointer">
+                                Remove From Backlog
+                            </button>
+                        </div>
+                    )}
+                    <input type="text" placeholder="Search Games" value={searchBacklog} onChange={(e) => setSearchBacklog(e.target.value)} className="mb-4 p-2 border rounded text-center" />
                     <div className="text-xl mb-2">Backlog: {backlog.length}</div>
                     <ScrollableWindow games={renderGames(filterGames(backlog, searchBacklog))} />
                 </div>
