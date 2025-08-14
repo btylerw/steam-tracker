@@ -17,6 +17,8 @@ function LoginSuccessInner() {
     const [selectedGames, setSelectedGames] = useState([]);
     const [searchOwned, setSearchOwned] = useState("");
     const [searchBacklog, setSearchBacklog] = useState("");
+    const [cooldown, setCooldown] = useState(0);
+    const [intervalId, setIntervalId] = useState(null);
     const router = useRouter();
 
     const handleLogOut = async () => {
@@ -45,7 +47,7 @@ function LoginSuccessInner() {
             }
             await axios.post('/api/steam/backlog/add', { gameIds: toAdd, userId: profile.id });
             setSelectedGames([]);
-            await getSteamData("false", profile.id);
+            await getSteamData('false', profile.id, 'false');
         } catch (err) {
             console.error("Error adding to backlog: ", err);
         }
@@ -60,7 +62,7 @@ function LoginSuccessInner() {
             }
             await axios.post('/api/steam/backlog/remove', { gameIds: toRemove, userId: profile.id });
             setSelectedGames([]);
-            await getSteamData("false", profile.id);
+            await getSteamData('false', profile.id, 'false');
         } catch (err) {
             console.error("Error removing from backlog: ", err);
         }
@@ -109,7 +111,7 @@ function LoginSuccessInner() {
                 // Syncs with Steam library automatically if current login time is more than 24 hours past last sync time
                 let sync = !res.data.last_synced || (Date.now() - new Date(res.data.last_synced).getTime() > 24 * 3600 * 1000);
                 sync = sync.toString();
-                await getSteamData(sync, res.data.id);
+                await getSteamData(sync, res.data.id, 'false');
             } catch (err) {
                 console.error(`Error fetching profile: ${err}`);
             }
@@ -118,10 +120,55 @@ function LoginSuccessInner() {
         fetchProfile();
     }, [steamid]);
 
-    const getSteamData = async (sync, id) => {
+    const handleForceSync = async () => {
+        if (cooldown > 0) return;
+        await getSteamData('true', profile.id, 'true');
+        alert("Steam info synced successfully!");
+        startCooldown(3600);
+    }
+
+    const startCooldown = (seconds) => {
+        setCooldown(seconds);
+        const id = setInterval(() => {
+            setCooldown(prev => {
+                if (prev <= 1) {
+                    clearInterval(id);
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+        setIntervalId(id);
+    }
+
+    const formatTime = (seconds) => {
+        const m = Math.floor(seconds / 60);
+        const s = Math.floor(seconds % 60);
+        return `${m}:${s.toString().padStart(2, '0')}`;
+    }
+
+    useEffect(() => {
+        if (!profile?.last_forced_sync) return;
+
+        const lastSyncTime = new Date(profile.last_forced_sync).getTime();
+        const now = Date.now();
+        const elapsed = (now - lastSyncTime) / 1000;
+        const remaining = Math.max(0, 3600 - elapsed);
+        setCooldown(remaining);
+
+        if (remaining > 0) {
+            startCooldown(remaining);
+        }
+
+        return () => {
+            if (intervalId) clearInterval(intervalId);
+        }
+    }, [profile?.last_forced_sync]);
+
+    const getSteamData = async (sync, id, force) => {
         try {
             if (sync === 'true') {
-                const setSync = await axios.get(`/api/steam/sync?userid=${id}`);
+                const setSync = await axios.get(`/api/steam/sync?userid=${id}&force=${force}`);
             }
             const result = await axios.get(`/api/steam/games?steamid=${steamid}&userid=${id}&sync=${sync}`);
             const { games, backlogList, backlogListTime } = result.data;
@@ -156,10 +203,13 @@ function LoginSuccessInner() {
                 </h2>
             )}
             <button
-                onClick={() => getSteamData("true", profile.id)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer"
+                onClick={handleForceSync}
+                disabled={cooldown > 0}
+                className={`px-4 py-2 rounded-md cursor-pointer ${
+                    cooldown > 0 ? "bg-gray-500 text-white cursor-not-allowed" : "bg-blue-600 text-white hover:bg-blue-700"
+                }`}
             >
-                Sync Steam Info
+                {cooldown > 0 ? `Try again in ${formatTime(cooldown)}` : "Sync Steam Info"}
             </button>
 
             {currentView === "owned" && (
