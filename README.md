@@ -17,7 +17,11 @@ Steam ID will not be saved, the only data that will be stored is account informa
 * [HowLongToBeatAPI](https://github.com/ckatzorke/howlongtobeat)
 
 ### TODOS
-* Setup and connect database to store user information
-* Setup authentication (JWT)
-* Allow users to customize backlog
-* Store backlog data in database to avoid performance heavy and repetitive API calls
+~~Setup and connect database to store user information~~  
+~~Setup authentication (JWT)~~  
+~~Allow users to customize backlog~~  
+~~Store backlog data in database to avoid performance heavy and repetitive API calls~~  
+* Create method to track progress on completing markdown
+* Update styling on Games/Backlog pages to more neatly display items
+* Investigate adding progress bars to backlog games
+* Add more account statistics to Home page
