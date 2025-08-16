@@ -2,7 +2,7 @@ import React from "react";
 
 const ScrollableWindow = ({ games }) => {
     return (
-        <div className="w-full max-w-md h-[60vh] overflow-y-auto border border-gray-300 p-4 rounded-lg shadow-md bg-white dark:bg-gray-800">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {games}
         </div>
     );

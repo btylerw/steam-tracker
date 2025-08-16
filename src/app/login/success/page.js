@@ -70,20 +70,29 @@ function LoginSuccessInner() {
 
     const renderGames = (games) => {
         return games.map((game) => (
-            <div key={game.appid} className="flex justify-between items-center mb-4 border p-2 rounded">
-                <div className="flex items-center gap-3">
-                    <input 
-                        type="checkbox" 
-                        checked={selectedGames.includes(game.appid)}
-                        onChange={() => toggleSelect(game.appid)}
-                        className="w-5 h-5 cursor-pointer accent-green-500 rounded-full"
-                    />
-                    <div>
-                        <h3 className="text-lg font-semibold">{game.name}</h3>
-                        <p>Playtime: {(game.playtime_minutes / 60).toFixed(1)} hours</p>
-                    </div>
+            <div key={game.appid} className="flex flex-col items-center border rounded-lg p-3 bg-gray-100 dark:bg-gray-700 shadow hover:shadow-lg transition">
+                <img
+                    className="h-40 w-full object-cover rounded-md mb-2"
+                    src={game.image_url}
+                    alt={`${game.name} icon`}
+                />
+                <div className="text-center w-full">
+                    <h3
+                        className="text-base font-semibold truncate w-full"
+                        title={game.name}
+                    >
+                        {game.name}
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">
+                        Playtime: {(game.playtime_minutes / 60).toFixed(1)} hours
+                    </p>
                 </div>
-                <img className="h-48 w-auto" src={game.image_url} alt={`${game.name} icon`} />
+                <input
+                    type="checkbox"
+                    checked={selectedGames.includes(game.appid)}
+                    onChange={() => toggleSelect(game.appid)}
+                    className="mt-2 w-5 h-5 cursor-pointer accent-green-500 rounded"
+                />
             </div>
         ));
     };
@@ -213,31 +222,31 @@ function LoginSuccessInner() {
             </button>
 
             {currentView === "owned" && (
-                <div className="w-full max-w-2xl flex flex-col items-center">
+                <div className="w-full max-w-4xl grid grid-rows-[auto_auto_auto_1fr] gap-4 h-[90vh] items-center">
                     {selectedGames.length > 0 && (
-                        <div className="flex gap-3 my-3">
+                        <div className="flex gap-3 justify-center">
                             <button onClick={handleAddToBacklog} className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 cursor-pointer">
                                 Add To Backlog
                             </button>
                         </div>
                     )}
                     <input type="text" placeholder="Search Games" value={searchOwned} onChange={(e) => setSearchOwned(e.target.value)} className="mb-4 p-2 border rounded text-center" />
-                    <div className="text-xl mb-2">Owned Games: {allGames.length}</div>
+                    <div className="text-xl mb-2 text-center">Owned Games: {allGames.length}</div>
                     <ScrollableWindow games={renderGames(filterGames(allGames, searchOwned))} />
                 </div>
             )}
 
             {currentView === "backlog" && (
-                <div className="w-full max-w-2xl flex flex-col items-center">
+                <div className="w-full max-w-4xl grid grid-rows-[auto_auto_auto_1fr] gap-4 h-[90vh]">
                     {selectedGames.length > 0 && (
-                        <div className="flex gap-3 my-3">
+                        <div className="flex gap-3 justify-center">
                             <button onClick={handleRemoveFromBacklog} className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 cursor-pointer">
                                 Remove From Backlog
                             </button>
                         </div>
                     )}
-                    <input type="text" placeholder="Search Games" value={searchBacklog} onChange={(e) => setSearchBacklog(e.target.value)} className="mb-4 p-2 border rounded text-center" />
-                    <div className="text-xl mb-2">Backlog: {backlog.length}</div>
+                    <input type="text" placeholder="Search Games" value={searchBacklog} onChange={(e) => setSearchBacklog(e.target.value)} className="p-2 border rounded text-center" />
+                    <div className="text-xl mb-2 text-center">Backlog: {backlog.length}</div>
                     <ScrollableWindow games={renderGames(filterGames(backlog, searchBacklog))} />
                 </div>
             )}
