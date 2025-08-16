@@ -230,14 +230,14 @@ function LoginSuccessInner() {
                             </button>
                         </div>
                     )}
-                    <input type="text" placeholder="Search Games" value={searchOwned} onChange={(e) => setSearchOwned(e.target.value)} className="mb-4 p-2 border rounded text-center" />
+                    <input type="text" placeholder="Search Games" value={searchOwned} onChange={(e) => setSearchOwned(e.target.value)} className="p-2 border rounded text-center" />
                     <div className="text-xl mb-2 text-center">Owned Games: {allGames.length}</div>
                     <ScrollableWindow games={renderGames(filterGames(allGames, searchOwned))} />
                 </div>
             )}
 
             {currentView === "backlog" && (
-                <div className="w-full max-w-4xl grid grid-rows-[auto_auto_auto_1fr] gap-4 h-[90vh]">
+                <div className="w-full max-w-4xl grid grid-rows-[auto_auto_auto_1fr] gap-4 h-[90vh] items-center">
                     {selectedGames.length > 0 && (
                         <div className="flex gap-3 justify-center">
                             <button onClick={handleRemoveFromBacklog} className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 cursor-pointer">
