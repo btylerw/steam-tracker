@@ -142,3 +142,17 @@ export async function addToBacklog(userid, gameIds) {
         AND appid = ANY(${gameIds});
     `;
 }
+
+export async function updateBacklogProgress(userid, games) {
+    if (!games?.length) return;
+    const tuples = games.map(({ appid, playtimeDiff }) => [userid, appid, playtimeDiff]);
+
+    await sql`
+        UPDATE backlog_entries AS b
+        SET playtime_minutes = b.playtime_minutes + v.playtimeDiff::int
+        FROM (VALUES ${sql(tuples)}) AS v(user_id, appid, playtimeDiff)
+        WHERE b.user_id = v.user_id::int
+        AND b.appid = v.appid::int
+        AND v.playtimeDiff::int <> 0;
+    `;
+}

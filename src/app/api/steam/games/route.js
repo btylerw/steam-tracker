@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getAllUserGames, saveUserGames, getUserBacklog, getAllGames } from "@/app/lib/games";
+import { getAllUserGames, saveUserGames, getUserBacklog, getAllGames, updateBacklogProgress } from "@/app/lib/games";
 import { getHLTBInfo } from "@/app/lib/hltb";
 
 export async function GET(req) {
@@ -14,9 +14,10 @@ export async function GET(req) {
             headers: { 'Content-Type': 'application/json' },
         });
     }
-
+    
     try {
         let games = await getAllUserGames(userid);
+        const backlogList = await getUserBacklog(userid);
         if (games.length === 0 || sync) {
             const response = await axios.get(
                 'https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/',
@@ -29,6 +30,18 @@ export async function GET(req) {
                 }
             );
             const steamGames = response.data.response.games ?? [];
+            // Comparing DB playtime with Steam playtime to track how long a game has been played
+            // Since it's been in the backlog
+            const playtimeDiffs = backlogList.map(backlogGame => {
+                const steamGame = steamGames.find(s => s.appid === backlogGame.appid);
+                if (!steamGame) return null;
+                return {
+                    appid: backlogGame.appid,
+                    playtimeDiff: steamGame.playtime_forever - backlogGame.playtime_minutes
+                };
+            }).filter(Boolean);
+
+            await updateBacklogProgress(userid, playtimeDiffs);
             const storedGames = await getAllGames();
             const dbGameMap = new Map(storedGames.map(game => [Number(game.appid), game]));
 
@@ -67,7 +80,6 @@ export async function GET(req) {
             games = [...knownGames, ...newGames];
             await saveUserGames(userid, games);
         }
-        const backlogList = await getUserBacklog(userid);
         const backlogListTime = backlogList.reduce((sum, game) => {
             return sum + (game.avg_completion_minutes / 60 || 0);
         }, 0);

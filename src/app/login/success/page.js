@@ -33,6 +33,8 @@ function LoginSuccessInner() {
     }
     
     const toggleSelect = (appid) => {
+        //A sync cooldown override for testing purposes
+        //setCooldown(0);
         setSelectedGames((prev) =>
             prev.includes(appid) ? prev.filter(id => id !== appid) : [...prev, appid]
         );
