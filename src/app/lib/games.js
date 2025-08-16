@@ -83,7 +83,8 @@ export async function getUserBacklog(userid) {
             g.image_url,
             g.avg_completion_minutes,
             ul.playtime_minutes,
-            b.status
+            b.status,
+            b.playtime_minutes AS time_in_backlog
         FROM user_library ul
         JOIN games g ON ul.appid = g.appid
         JOIN backlog_entries b ON ul.appid = b.appid AND ul.user_id = b.user_id

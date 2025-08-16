@@ -70,7 +70,7 @@ function LoginSuccessInner() {
         }
     }
 
-    const renderGames = (games) => {
+    const renderGames = (games, forBacklog) => {
         return games.map((game) => (
             <div key={game.appid} className="flex flex-col items-center border rounded-lg p-3 bg-gray-100 dark:bg-gray-700 shadow hover:shadow-lg transition">
                 <img
@@ -88,6 +88,11 @@ function LoginSuccessInner() {
                     <p className="text-sm text-gray-600 dark:text-gray-300">
                         Playtime: {(game.playtime_minutes / 60).toFixed(1)} hours
                     </p>
+                    {forBacklog &&
+                        <progress value={game.time_in_backlog} max={game.avg_completion_minutes} className="[&::-webkit-progress-bar]:rounded-lg [&::-webkit-progress-value]:rounded-lg
+                        [&::-webkit-progress-bar]:bg-slate-300 [&::-webkit-progress-value]:bg-blue-400 [&::-moz-progress-bar]:bg-blue-400">
+                        </progress>
+                    }
                 </div>
                 <input
                     type="checkbox"
@@ -184,7 +189,7 @@ function LoginSuccessInner() {
             const result = await axios.get(`/api/steam/games?steamid=${steamid}&userid=${id}&sync=${sync}`);
             const { games, backlogList, backlogListTime } = result.data;
             const sortedGames = games.sort((a, b) => b.playtime_minutes - a.playtime_minutes);
-            const sortedBacklog = backlogList.sort((a, b) => b.playtime_minutes - a.playtime_minutes);
+            const sortedBacklog = backlogList.sort((a, b) => b.time_in_backlog - a.time_in_backlog);
             setAllGames(sortedGames);
             setBacklog(sortedBacklog);
             setBacklogTime(backlogListTime);
@@ -234,7 +239,7 @@ function LoginSuccessInner() {
                     )}
                     <input type="text" placeholder="Search Games" value={searchOwned} onChange={(e) => setSearchOwned(e.target.value)} className="p-2 border rounded text-center" />
                     <div className="text-xl mb-2 text-center">Owned Games: {allGames.length}</div>
-                    <ScrollableWindow games={renderGames(filterGames(allGames, searchOwned))} />
+                    <ScrollableWindow games={renderGames(filterGames(allGames, searchOwned), false)} />
                 </div>
             )}
 
@@ -249,7 +254,7 @@ function LoginSuccessInner() {
                     )}
                     <input type="text" placeholder="Search Games" value={searchBacklog} onChange={(e) => setSearchBacklog(e.target.value)} className="p-2 border rounded text-center" />
                     <div className="text-xl mb-2 text-center">Backlog: {backlog.length}</div>
-                    <ScrollableWindow games={renderGames(filterGames(backlog, searchBacklog))} />
+                    <ScrollableWindow games={renderGames(filterGames(backlog, searchBacklog), true)} />
                 </div>
             )}
         </Dashboard>
