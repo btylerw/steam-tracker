@@ -89,8 +89,9 @@ function LoginSuccessInner() {
                         Playtime: {(game.playtime_minutes / 60).toFixed(1)} hours
                     </p>
                     {forBacklog &&
-                        <progress value={game.time_in_backlog} max={game.avg_completion_minutes} className="[&::-webkit-progress-bar]:rounded-lg [&::-webkit-progress-value]:rounded-lg
-                        [&::-webkit-progress-bar]:bg-slate-300 [&::-webkit-progress-value]:bg-blue-400 [&::-moz-progress-bar]:bg-blue-400">
+                        <progress value={game.time_in_backlog} max={game.avg_completion_minutes} className="block w-full h-3 mt-2 rounded-lg
+                            [&::-webkit-progress-bar]:rounded-lg [&::-webkit-progress-value]:rounded-lg
+                            [&::-webkit-progress-bar]:bg-slate-300 [&::-webkit-progress-value]:bg-blue-400 [&::-moz-progress-bar]:bg-blue-400">
                         </progress>
                     }
                 </div>
