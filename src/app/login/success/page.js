@@ -32,18 +32,25 @@ function LoginSuccessInner() {
         );
     }
     
-    const toggleSelect = (appid) => {
+    const toggleSelect = (game) => {
         //A sync cooldown override for testing purposes
         //setCooldown(0);
-        setSelectedGames((prev) =>
-            prev.includes(appid) ? prev.filter(id => id !== appid) : [...prev, appid]
-        );
+        const appid = game.appid;
+        const playtime_minutes = game.playtime_minutes;
+        setSelectedGames((prev) => {
+            const exists = prev.some(g => g.appid === appid);
+            if (exists) {
+                return prev.filter(g => g.appid !== appid);
+            } else {
+                return [...prev, { appid, playtime_minutes }];
+            }
+        });
     };
 
     const handleAddToBacklog = async () => {
         try {
             const backlogIds = backlog.map(g => g.appid);
-            const toAdd = selectedGames.filter(id => !backlogIds.includes(id));
+            const toAdd = selectedGames.filter(g => !backlogIds.includes(g.appid)).map(g => g.appid);
             if (toAdd.length === 0) {
                 return;
             }
@@ -58,7 +65,7 @@ function LoginSuccessInner() {
     const handleRemoveFromBacklog = async () => {
         try {
             const backlogIds = backlog.map(g => g.appid);
-            const toRemove = selectedGames.filter(id => backlogIds.includes(id));
+            const toRemove = selectedGames.filter(g => backlogIds.includes(g.appid)).map(g => g.appid);
             if (toRemove.length === 0) {
                 return;
             }
@@ -70,9 +77,18 @@ function LoginSuccessInner() {
         }
     }
 
+    const handlePlaythroughReset = async (gameId) => {
+        try {
+            await axios.post('/api/steam/backlog/reset', { gameId: gameId, userId: profile.id });
+            await getSteamData('false', profile.id, 'false');
+        }  catch (err) {
+            console.error("Error resetting playthrough");
+        }
+    }
+
     const renderGames = (games, forBacklog) => {
         return games.map((game) => (
-            <div key={game.appid} className="flex flex-col items-center border rounded-lg p-3 bg-gray-100 dark:bg-gray-700 shadow hover:shadow-lg transition">
+            <div key={game.appid} className="flex flex-col items-center border rounded-lg p-3 bg-gray-100 dark:bg-gray-700 shadow hover:shadow-lg transition gap-2">
                 <img
                     className="h-40 w-full object-cover rounded-md mb-2"
                     src={game.image_url}
@@ -85,20 +101,32 @@ function LoginSuccessInner() {
                     >
                         {game.name}
                     </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">
-                        Playtime: {(game.playtime_minutes / 60).toFixed(1)} hours
-                    </p>
+                    {!forBacklog &&
+                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                            Playtime: {(game.playtime_minutes / 60).toFixed(1)} hours
+                        </p>
+                    }
                     {forBacklog &&
-                        <progress value={game.time_in_backlog} max={game.avg_completion_minutes} className="block w-full h-3 mt-2 rounded-lg
-                            [&::-webkit-progress-bar]:rounded-lg [&::-webkit-progress-value]:rounded-lg
-                            [&::-webkit-progress-bar]:bg-slate-300 [&::-webkit-progress-value]:bg-blue-400 [&::-moz-progress-bar]:bg-blue-400">
-                        </progress>
+                        <>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                                {(game.time_in_backlog / 60).toFixed(1)} of {(game.avg_completion_minutes / 60).toFixed(1)} hours played
+                            </p>
+                            <progress value={game.time_in_backlog} max={game.avg_completion_minutes} className="block w-full h-3 mt-2 rounded-lg
+                                [&::-webkit-progress-bar]:rounded-lg [&::-webkit-progress-value]:rounded-lg
+                                [&::-webkit-progress-bar]:bg-slate-300 [&::-webkit-progress-value]:bg-blue-400 [&::-moz-progress-bar]:bg-blue-400">
+                            </progress>
+                        </>
                     }
                 </div>
+                {forBacklog &&
+                    <button className="px-4 py-2 rounded-lg bg-red-400 text-white hover:bg-red-400 transition cursor-pointer" onClick={() => handlePlaythroughReset(game.appid)}>
+                        New Playthrough
+                    </button>
+                }
                 <input
                     type="checkbox"
-                    checked={selectedGames.includes(game.appid)}
-                    onChange={() => toggleSelect(game.appid)}
+                    checked={selectedGames.some(g => g.appid ===  game.appid)}
+                    onChange={() => toggleSelect(game)}
                     className="mt-2 w-5 h-5 cursor-pointer accent-green-500 rounded"
                 />
             </div>
@@ -139,9 +167,8 @@ function LoginSuccessInner() {
 
     const handleForceSync = async () => {
         if (cooldown > 0) return;
-        await getSteamData('true', profile.id, 'true');
-        alert("Steam info synced successfully!");
         startCooldown(3600);
+        await getSteamData('true', profile.id, 'true');
     }
 
     const startCooldown = (seconds) => {
@@ -190,7 +217,7 @@ function LoginSuccessInner() {
             const result = await axios.get(`/api/steam/games?steamid=${steamid}&userid=${id}&sync=${sync}`);
             const { games, backlogList, backlogListTime } = result.data;
             const sortedGames = games.sort((a, b) => b.playtime_minutes - a.playtime_minutes);
-            const sortedBacklog = backlogList.sort((a, b) => b.time_in_backlog - a.time_in_backlog);
+            const sortedBacklog = backlogList.sort((a, b) => (b.time_in_backlog / b.avg_completion_minutes) - (a.time_in_backlog / a.avg_completion_minutes));
             setAllGames(sortedGames);
             setBacklog(sortedBacklog);
             setBacklogTime(backlogListTime);

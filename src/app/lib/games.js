@@ -37,25 +37,32 @@ export async function saveUserGames(userid, games) {
     const backlogEntries = games.filter(g => g.avg_completion_minutes != null && g.playtime_minutes < g.avg_completion_minutes * 0.75)
     .map(g => ({
         appid: g.appid,
+        playtime_minutes: g.playtime_minutes,
         status: g.playtime_minutes === 0 ? 'not played' : 'playing',
     }));
 
     if (backlogEntries.length > 0) {
-        const backlogValues = backlogEntries.map(g => [Number(userid), Number(g.appid), g.status]);
+        const backlogValues = backlogEntries.map(g => [Number(userid), Number(g.appid), Number(g.playtime_minutes), g.status]);
         await sql`
-        INSERT INTO backlog_entries (user_id, appid, status)
+        INSERT INTO backlog_entries (user_id, appid, playtime_minutes, status)
         SELECT
             t.user_id::int,
             t.appid::int,
+            t.playtime_minutes::int,
             t.status::text
         FROM (
             VALUES ${sql(backlogValues)}
-        ) as t(user_id, appid, status)
+        ) as t(user_id, appid, playtime_minutes, status)
         JOIN user_library ul
             ON ul.user_id = t.user_id::int
             AND ul.appid = t.appid::int
         WHERE ul.removed_from_backlog = false
-        ON CONFLICT (user_id, appid) DO UPDATE SET status = EXCLUDED.status;
+        ON CONFLICT (user_id, appid) DO UPDATE SET status = EXCLUDED.status, 
+            playtime_minutes = CASE
+                WHEN backlog_entries.reset_playthrough = false
+                THEN EXCLUDED.playtime_minutes
+                ELSE backlog_entries.playtime_minutes
+            END
         `;
     }
 }
@@ -125,11 +132,12 @@ export async function addToBacklog(userid, gameIds) {
     const status = 'not played';
     const backlogValues = gameIds.map(id => [Number(userid), Number(id), status]);
     await sql`
-        INSERT INTO backlog_entries (user_id, appid, status)
+        INSERT INTO backlog_entries (user_id, appid, status, reset_playthrough)
         SELECT
             user_id::int,
             appid::int,
-            status::text
+            status::text,
+            true
         FROM (
             VALUES ${sql(backlogValues)}
         ) as t(user_id, appid, status)
@@ -155,5 +163,15 @@ export async function updateBacklogProgress(userid, games) {
         WHERE b.user_id = v.user_id::int
         AND b.appid = v.appid::int
         AND v.playtimeDiff::int <> 0;
+    `;
+}
+
+export async function resetBacklogPlaythrough(userId, gameId) {
+    if (!userId || !gameId) return;
+    await sql`
+        UPDATE backlog_entries
+        SET playtime_minutes = 0, reset_playthrough = true
+        WHERE user_id = ${userId}
+        AND appid = ${gameId}
     `;
 }
